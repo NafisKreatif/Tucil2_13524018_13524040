@@ -99,6 +99,40 @@ struct Triangle {
     }
 };
 
+// Camera class
+struct Camera {
+    Point3D position;
+    float zoom;
+
+    // Default camera position
+    Camera() : position(0, 0, -5), zoom(1.0f) {}
+
+    // Returns the translation matrix from camera position
+    Mat4 getViewMatrix() const {
+        Mat4 translation;
+        translation.m[0][3] = -position.x;
+        translation.m[1][3] = -position.y;
+        translation.m[2][3] = -position.z;
+        
+        return translation;
+    }
+
+    // Projection matrix ( Range : [-1,1] )
+    Mat4 getProjectionMatrix(float aspectRatio, float fov, float near, float far) const {
+        Mat4 proj;
+        float tanFov = std::tan(fov / 2.0f);
+        
+        proj.m[0][0] = 1.0f / (aspectRatio * tanFov);
+        proj.m[1][1] = 1.0f / tanFov;
+        proj.m[2][2] = -(far + near) / (far - near);
+        proj.m[2][3] = -(2.0f * far * near) / (far - near);
+        proj.m[3][2] = -1.0f;
+        proj.m[3][3] = 0.0f;
+        
+        return proj;
+    }
+};
+
 class Renderer{
 
 };
