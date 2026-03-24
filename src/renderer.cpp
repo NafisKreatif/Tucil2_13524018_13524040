@@ -207,6 +207,10 @@ class Renderer{
         Camera camera;
         Model model;
 
+        // Mouse info
+        bool isDragging;
+        sf::Vector2i lastMousePos;
+
         // Object rotation
         float objectRotationX;
         float objectRotationY;
@@ -342,6 +346,30 @@ class Renderer{
 
             window.display();
         }
+
+        void handleInput(sf::Event event) {
+            if ( event.type == sf::Event::MouseButtonPressed ) {
+                if ( event.mouseButton.button == sf::Mouse::Left ){
+                    isDragging = true;
+                    lastMousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+                }
+            }
+            else if ( event.type == sf::Event::MouseButtonReleased ) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    isDragging = false;
+                }
+            }
+            else if ( event.type == sf::Event::MouseMoved ){
+                if ( isDragging ){
+                    sf::Vector2i curMousePos(event.mouseMove.x, event.mouseMove.y);
+                    sf::Vector2i delta = curMousePos - lastMousePos;
+
+                    objectRotationX += delta.y * 0.01f;
+                    objectRotationY += delta.x * 0.01f;
+                    lastMousePos = curMousePos; 
+                }
+            }
+        }
 };
 
 int main(int argc, char* argv[]) {
@@ -367,6 +395,8 @@ int main(int argc, char* argv[]) {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+
+            renderer.handleInput(event);
         }
 
         renderer.render();
