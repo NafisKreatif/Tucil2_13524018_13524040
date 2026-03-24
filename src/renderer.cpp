@@ -275,7 +275,7 @@ class Renderer{
             zoomMat.m[1][1] = camera.zoom;
             zoomMat.m[2][2] = camera.zoom;
             
-            Mat4 mat = view * projection * zoomMat * modelMat;
+            Mat4 mat = projection * view * zoomMat * modelMat;
 
             // Transform vertices to screen
             std::vector<sf::Vector2f> screenVect;
