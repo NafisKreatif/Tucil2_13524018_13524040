@@ -14,9 +14,10 @@ OBJ_FILES   := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRC_FILES))
 CC          := g++
 CFLAGS      := -Wall -Wextra -I$(SRC_DIR)
 DEBUG_FLAGS := -g
+SFML_FLAGS := -lsfml-graphics -lsfml-window -lsfml-system
 
 # Define phony targets
-.PHONY: all debug run clean clean-bin clean-all
+.PHONY: all debug renderer run clean clean-bin clean-all
 
 # Build the program
 all: $(TARGET)
@@ -54,3 +55,7 @@ clean-all: clean clean-bin
 print:
 	@echo $(SRC_FILES)
 	@echo $(OBJ_FILES)
+
+renderer:
+	@echo "Building renderer..."
+	$(CC) -o renderer src/renderer.cpp src/stima/geometry/Point3D.cpp $(SFML_FLAGS)
