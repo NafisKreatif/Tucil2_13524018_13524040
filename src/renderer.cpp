@@ -222,12 +222,25 @@ class Renderer{
         sf::Color baseColour;
         sf::Color bgColour;
 
+        // Stats attributes
+        bool showStats;
+        sf::Font font;
+        sf::Text stats;
+
     public:
         Renderer(sf::RenderWindow& window)
             : window(window), baseColour(128,128,128), bgColour(0,0,0), 
             objectRotationX(0), objectRotationY(0), objectRotationZ(0),
-            isDragging(0),
-            lightDir(Point3D(0.5f, -1.0f, 0.5f).normalize()) {}
+            isDragging(0), showStats(0),
+            lightDir(Point3D(0.5f, -1.0f, 0.5f).normalize()) {
+                if (!font.loadFromFile("assets/consolas.ttf"))
+                {
+                    std::cerr << "Error loading font file!" << std::endl;
+                }
+                stats.setFont(font);
+                stats.setCharacterSize(20);
+                stats.setFillColor(sf::Color::White);
+            }
 
         bool loadModel(const std::string& filename){
             bool success = model.loadOBJ(filename);
@@ -257,7 +270,22 @@ class Renderer{
                 static_cast<sf::Uint8>(baseColour.b * intensity)
             );
         }
-       
+       void updateStatsText() {
+            char buffer[128];
+            double toDegrees = 180.0 / PI;
+            
+            double degX = std::fmod(std::fmod(objectRotationX * toDegrees, 360.0) + 360.0, 360.0);
+            double degY = std::fmod(std::fmod(objectRotationY * toDegrees, 360.0) + 360.0, 360.0);
+            
+            snprintf(buffer, sizeof(buffer), "zoom : %.2fx | x-Axis : %.3f | y-Axis : %.3f", 
+                     camera.zoom, degY, degX);
+            
+            stats.setString(buffer);
+            
+            sf::FloatRect bounds = stats.getLocalBounds();
+            stats.setPosition(sf::Vector2f(window.getSize().x - bounds.width - 50, window.getSize().y - bounds.height - 50));
+        }
+
         void render() {
             window.clear(bgColour);
 
@@ -344,6 +372,11 @@ class Renderer{
                 window.draw(triangle);
             }
 
+            if( showStats ){
+                updateStatsText();
+                window.draw(stats);
+            }
+
             window.display();
         }
 
@@ -373,6 +406,11 @@ class Renderer{
                 int delta = event.mouseWheelScroll.delta;
                 camera.zoom += delta * 0.1f;
                 camera.zoom = std::max(0.1f, std::min(camera.zoom, 12.0f));
+            }
+            else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::LAlt || event.key.code == sf::Keyboard::RAlt) {
+                    showStats ^= 1;
+                }
             }
         }
 };
