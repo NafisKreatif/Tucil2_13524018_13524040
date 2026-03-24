@@ -164,9 +164,9 @@ public:
                 iss >> v1 >> v2 >> v3;
                 
                 // Parse vertex indices (handle "v/vt/vn" format)
-                int idx1 = std::stoi(v1);
-                int idx2 = std::stoi(v2);
-                int idx3 = std::stoi(v3);
+                int idx1 = std::stoi(v1) - 1;
+                int idx2 = std::stoi(v2) - 1;
+                int idx3 = std::stoi(v3) - 1;
                 
                 faces.push_back(Face(idx1, idx2, idx3));
             }
@@ -330,7 +330,7 @@ class Renderer{
 
             // Fill colour
             for(const auto& tri : triangles) {
-                std::cout << tri.v1.x << " " << tri.v1.y << " " << tri.v2.x << " " << tri.v2.y << tri.v3.x << " " << tri.v3.y << std::endl; 
+                // std::cout << tri.v1.x << " " << tri.v1.y << " " << tri.v2.x << " " << tri.v2.y << tri.v3.x << " " << tri.v3.y << std::endl; 
                 sf::ConvexShape triangle(3);
                 triangle.setPoint(0, tri.v1);
                 triangle.setPoint(1, tri.v2);
