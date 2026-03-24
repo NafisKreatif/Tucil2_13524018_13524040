@@ -97,7 +97,7 @@ struct Triangle {
     sf::Color color;
     
     bool operator<(const Triangle& other) const {
-        return avgDepth > other.avgDepth;
+        return avgDepth-other.avgDepth < 1e-8;
     }
 };
 
