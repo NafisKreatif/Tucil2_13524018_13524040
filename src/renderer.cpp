@@ -401,6 +401,10 @@ int main(int argc, char* argv[]) {
                 window.close();
             }
 
+            if (event.type == sf::Event::Resized) {
+                sf::FloatRect newArea(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(newArea));
+            }
             renderer.handleInput(event);
         }
 
