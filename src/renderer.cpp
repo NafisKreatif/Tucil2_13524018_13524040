@@ -136,7 +136,6 @@ struct Camera {
 };
 
 struct Model {
-public:
     std::vector<Point3D> vertices;
     std::vector<Face> faces;
     Point3D center;
@@ -374,6 +373,10 @@ class Renderer{
                 int delta = event.mouseWheelScroll.delta;
                 camera.zoom += delta * 0.1f;
                 camera.zoom = std::max(0.1f, std::min(camera.zoom, 12.0f));
+            }
+            else if ( event.type == sf::Event::Resized ){
+                camera.position.x += event.size.width - 900;
+                camera.position.y += event.size.height - 900; 
             }
         }
 };
