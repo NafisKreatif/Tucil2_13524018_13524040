@@ -369,6 +369,11 @@ class Renderer{
                     lastMousePos = curMousePos; 
                 }
             }
+            else if ( event.type == sf::Event::MouseWheelScrolled ){
+                int delta = event.mouseWheelScroll.delta;
+                camera.zoom += delta * 0.1f;
+                camera.zoom = std::max(0.1f, std::min(camera.zoom, 12.0f));
+            }
         }
 };
 
@@ -377,7 +382,7 @@ int main(int argc, char* argv[]) {
     std::string objFile = argv[1];
     
     // Create window
-    sf::RenderWindow window(sf::VideoMode(1200, 900), "Tucil2_13524018_13524040");
+    sf::RenderWindow window(sf::VideoMode(900, 900), "Tucil2_13524018_13524040");
     window.setFramerateLimit(60);
     
     Renderer renderer(window);
