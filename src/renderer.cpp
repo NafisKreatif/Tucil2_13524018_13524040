@@ -222,7 +222,8 @@ class Renderer{
     public:
         Renderer(sf::RenderWindow& window)
             : window(window), baseColour(128,128,128), bgColour(0,0,0), 
-            objectRotationX(0), objectRotationY(0), objectRotationZ(0) {}
+            objectRotationX(0), objectRotationY(0), objectRotationZ(0),
+            lightDir(Point3D(0.5f, -1.0f, 0.5f).normalize()) {}
 
         bool loadModel(const std::string& filename){
             bool success = model.loadOBJ(filename);
