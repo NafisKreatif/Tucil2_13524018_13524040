@@ -226,6 +226,7 @@ class Renderer{
         Renderer(sf::RenderWindow& window)
             : window(window), baseColour(128,128,128), bgColour(0,0,0), 
             objectRotationX(0), objectRotationY(0), objectRotationZ(0),
+            isDragging(0),
             lightDir(Point3D(0.5f, -1.0f, 0.5f).normalize()) {}
 
         bool loadModel(const std::string& filename){
@@ -372,10 +373,6 @@ class Renderer{
                 int delta = event.mouseWheelScroll.delta;
                 camera.zoom += delta * 0.1f;
                 camera.zoom = std::max(0.1f, std::min(camera.zoom, 12.0f));
-            }
-            else if ( event.type == sf::Event::Resized ){
-                camera.position.x += event.size.width - 900;
-                camera.position.y += event.size.height - 900; 
             }
         }
 };
