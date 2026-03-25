@@ -87,8 +87,8 @@ namespace stima {
         voxalizeRecursive(0, maxDepth, pMin, pMax, vertices, faces, 0);
         auto end = std::chrono::steady_clock::now();
         std::cout << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-        std::cout << "Outputting to " << "test/voxelized-" + filePath.filename().string() << std::endl;
-        std::ofstream outputFile("test/voxelized-" + filePath.filename().string());
+        std::cout << "Outputting to " << "tes/output/voxelized-" + filePath.filename().string() << std::endl;
+        std::ofstream outputFile("test/output/voxelized-" + filePath.filename().string());
         for (auto &&p : resultVertices) {
             outputFile << "v " << p.x << " " << p.y << " " << p.z << "\n";
         }
