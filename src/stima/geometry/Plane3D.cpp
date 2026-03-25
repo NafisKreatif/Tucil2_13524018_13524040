@@ -23,7 +23,7 @@ namespace stima {
 
     bool Plane3D::isParallel(Line3D line)
     {
-        return std::abs(getNormal().dotProduct(line.v)) < 1e-6;
+        return std::abs(getNormal().dotProduct(line.v)) < 1e-9;
     }
     bool Plane3D::isParallel(Plane3D plane)
     {
@@ -32,7 +32,7 @@ namespace stima {
 
     bool Plane3D::isIntersect(Line3D line)
     {
-        return std::abs(getNormal().dotProduct(line.v)) > 1e-6;
+        return std::abs(getNormal().dotProduct(line.v)) > 1e-9;
     }
 
     Point3D Plane3D::getIntersection(Line3D line)

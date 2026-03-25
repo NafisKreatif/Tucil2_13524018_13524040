@@ -37,7 +37,7 @@ namespace stima {
         Point3D normalize();
         double dotProduct(const Point3D &p);
         Point3D crossProduct(const Point3D &p);
-        bool isApproximately(const Point3D &p, double epsilon = 1e-6);
+        bool isApproximately(const Point3D &p, double epsilon = 1e-9);
 
         std::string toString();
     };
