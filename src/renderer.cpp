@@ -1,4 +1,4 @@
-#include "SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
 #include "stima/geometry/Point3D.hpp"
 #include <filesystem>
 #include <fstream>
@@ -416,6 +416,11 @@ class Renderer{
 };
 
 int main(int argc, char* argv[]) {
+    if (argc <= 1) {
+        std::cerr << "Please specify .obj file to render" << std::endl;
+        return 0;
+    }
+
     // Get OBJ file from command line
     std::string objFile = argv[1];
     
