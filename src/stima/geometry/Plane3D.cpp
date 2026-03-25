@@ -21,21 +21,25 @@ namespace stima {
         return Point3D(a, b, c);
     }
 
-    bool Plane3D::isParallel(Line3D line)
+    bool Plane3D::isOnThePlane(Point3D& p)
+    {
+        return std::abs(a * p.x + b * p.y + c * p.z + d) < 1e-9;
+    }
+    bool Plane3D::isParallel(Line3D& line)
     {
         return std::abs(getNormal().dotProduct(line.v)) < 1e-9;
     }
-    bool Plane3D::isParallel(Plane3D plane)
+    bool Plane3D::isParallel(Plane3D& plane)
     {
         return getNormal().isApproximately(plane.getNormal());
     }
 
-    bool Plane3D::isIntersect(Line3D line)
+    bool Plane3D::isIntersect(Line3D& line)
     {
         return std::abs(getNormal().dotProduct(line.v)) > 1e-9;
     }
 
-    Point3D Plane3D::getIntersection(Line3D line)
+    Point3D Plane3D::getIntersection(Line3D& line)
     {
         if (!isIntersect(line)) {
             throw std::invalid_argument("The plane does not have intersection with the line");

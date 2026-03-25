@@ -70,9 +70,10 @@ namespace stima {
             pMax.y = std::max(pMax.y, p.y);
             pMax.z = std::max(pMax.z, p.z);
         }
+        pMin -= Point3D(1, 1, 1);
         Point3D v = pMax - pMin;
         double maxV = std::max(std::max(v.x, v.y), v.z);
-        pMax = pMin + Point3D(maxV, maxV, maxV);
+        pMax = pMin + Point3D(maxV, maxV, maxV) + Point3D(1, 1, 1);
         progress = 0;
         maxProgress = (std::pow(8, maxDepth + 1) - 1) / 7.0;
         lastPercentage = 0;
@@ -81,12 +82,13 @@ namespace stima {
         notTraversedCount.clear();
         resultVertices.clear();
         resultFaces.clear();
+        std::cout << "Voxelizing..." << std::endl;
         auto start = std::chrono::steady_clock::now();
         voxalizeRecursive(0, maxDepth, pMin, pMax, vertices, faces, 0);
         auto end = std::chrono::steady_clock::now();
         std::cout << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-        std::cout << "Outputting to " << "output/voxelized-" + filePath.filename().string() << std::endl;
-        std::ofstream outputFile("output/voxelized-" + filePath.filename().string());
+        std::cout << "Outputting to " << "tes/output/voxelized-" + filePath.filename().string() << std::endl;
+        std::ofstream outputFile("test/output/voxelized-" + filePath.filename().string());
         for (auto &&p : resultVertices) {
             outputFile << "v " << p.x << " " << p.y << " " << p.z << "\n";
         }
@@ -147,14 +149,13 @@ namespace stima {
         Point3D v = pMax - pMin;
         bool isIntersect = false;
         int intersectIndex = startFaceIndex;
-        for (size_t f = startFaceIndex; f < faces.size(); f++) {
+        for (int f = startFaceIndex; f < (int)faces.size(); f++) {
             // Point of triangle
             Point3D pt[3] = {
                 vertices[std::get<0>(faces[f]) - 1],
                 vertices[std::get<1>(faces[f]) - 1],
                 vertices[std::get<2>(faces[f]) - 1]};
             // Check is one of the triangle point is inside the cube
-            Plane3D triangleFace = Plane3D(pt[0], pt[1], pt[2]);
             for (int k = 0; k < 3; k++) {
                 if (isBetweenTwoPoints(pt[k], pMin, pMax)) {
                     isIntersect = true;
@@ -165,6 +166,7 @@ namespace stima {
                 intersectIndex = f;
                 break;
             }
+            Plane3D triangleFace = Plane3D(pt[0], pt[1], pt[2]);
             for (int j = 0; j < 6; j++) {
                 // Point of square
                 Point3D ps[4];
@@ -172,7 +174,7 @@ namespace stima {
                     ps[0] = pMin;
                     ps[1] = pMin + Point3D(v.x * fx[j % 3], v.y * fy[j % 3], v.z * fz[j % 3]);
                     ps[2] = pMin + Point3D(v.x * fx[j % 3], v.y * fy[j % 3], v.z * fz[j % 3]) + Point3D(v.x * fx[(j + 1) % 3], v.y * fy[(j + 1) % 3], v.z * fz[(j + 1) % 3]);
-                    ps[3] = pMin + Point3D(v.x * fx[(j + 1) % 3], v.y * fy[(j + 1) % 3], fz[(j + 1) % 3]);
+                    ps[3] = pMin + Point3D(v.x * fx[(j + 1) % 3], v.y * fy[(j + 1) % 3], v.z * fz[(j + 1) % 3]);
                 }
                 else {
                     ps[0] = pMax - Point3D(v.x * fx[j % 3], v.y * fy[j % 3], v.z * fz[j % 3]) - Point3D(v.x * fx[(j + 1) % 3], v.y * fy[(j + 1) % 3], v.z * fz[(j + 1) % 3]);
@@ -191,7 +193,7 @@ namespace stima {
                         if ((intersection - pt[k]).dotProduct(triangleSide.v) < 0 || (intersection - pt[(k + 1) % 3]).dotProduct(-triangleSide.v) < 0) {
                             isInBetween = false;
                         }
-                        if (fx[j % 3] == 1 && fy[(j + 1) % 3] == 1) {
+                        else if (std::abs(ps[2].z - ps[0].z) < 1e-9) {
                             if (intersection.x < ps[0].x || intersection.x > ps[2].x) {
                                 isInBetween = false;
                             }
@@ -199,7 +201,7 @@ namespace stima {
                                 isInBetween = false;
                             }
                         }
-                        else if (fy[j % 3] == 1 && fz[(j + 1) % 3] == 1) {
+                        else if (std::abs(ps[2].x - ps[0].x) < 1e-9) {
                             if (intersection.y < ps[0].y || intersection.y > ps[2].y) {
                                 isInBetween = false;
                             }
@@ -207,7 +209,7 @@ namespace stima {
                                 isInBetween = false;
                             }
                         }
-                        else if (fz[j % 3] == 1 && fx[(j + 1) % 3] == 1) {
+                        else if (std::abs(ps[2].y - ps[0].y) < 1e-9) {
                             if (intersection.x < ps[0].x || intersection.x > ps[2].x) {
                                 isInBetween = false;
                             }
@@ -229,11 +231,15 @@ namespace stima {
                     Line3D squareSide = Line3D(ps[k], ps[(k + 1) % 4]);
                     if (triangleFace.isIntersect(squareSide)) {
                         Point3D intersection = triangleFace.getIntersection(squareSide);
-                        Point3D cp1 = (pt[1] - pt[0]).crossProduct(intersection - pt[0]).normalize();
-                        Point3D cp2 = (pt[2] - pt[1]).crossProduct(intersection - pt[1]).normalize();
-                        Point3D cp3 = (pt[0] - pt[2]).crossProduct(intersection - pt[2]).normalize();
-                        if (cp1.isApproximately(cp2) && cp2.isApproximately(cp3) && cp3.isApproximately(cp1) &&
-                            (intersection - ps[k]).dotProduct(squareSide.v) >= 0 && (intersection - ps[(k + 1) % 4]).dotProduct(-squareSide.v) >= 0) {
+                        Point3D cp1 = (pt[1] - pt[0]).crossProduct(intersection - pt[0]);
+                        Point3D cp2 = (pt[2] - pt[1]).crossProduct(intersection - pt[1]);
+                        Point3D cp3 = (pt[0] - pt[2]).crossProduct(intersection - pt[2]);
+                        bool sameX = (cp1.x >= 0 && cp2.x >= 0 && cp3.x >= 0) || (cp1.x <= 0 && cp2.x <= 0 && cp3.x <= 0);
+                        bool sameY = (cp1.y >= 0 && cp2.y >= 0 && cp3.y >= 0) || (cp1.y <= 0 && cp2.y <= 0 && cp3.y <= 0);
+                        bool sameZ = (cp1.z >= 0 && cp2.z >= 0 && cp3.z >= 0) || (cp1.z <= 0 && cp2.z <= 0 && cp3.z <= 0);
+                        bool orientedTheSame = sameX && sameY && sameZ;
+                        bool atSquareSide = (intersection - ps[k]).dotProduct(squareSide.v) >= 0 && (intersection - ps[(k + 1) % 4]).dotProduct(-squareSide.v) >= 0;
+                        if (orientedTheSame && atSquareSide) {
                             isIntersect = true;
                             break;
                         }
@@ -261,7 +267,7 @@ namespace stima {
                 }
                 for (int i = 0; i < 6; i++) {
                     resultFaces.push_back({k + ki[i][0], k + ki[i][1], k + ki[i][2]});
-                    resultFaces.push_back({k + ki[i][3], k + ki[i][1], k + ki[i][2]});
+                    resultFaces.push_back({k + ki[i][1], k + ki[i][2], k + ki[i][3]});
                 }
                 canOutput.unlock();
             }
@@ -308,8 +314,8 @@ namespace stima {
             while ((int)notTraversedCount.size() <= depth)
                 notTraversedCount.push_back(0);
             notTraversedCount[depth]++;
-            canOutput.unlock();
             progress += (std::pow(8, maxDepth - depth + 1) - 1) / 7.0;
+            canOutput.unlock();
             // if (progress / maxProgress > lastPercentage) {
             // std::cout << "Progress (" << std::round(progress / maxProgress * 10) / 10 << "%)..." << std::endl;
             //     lastPercentage = std::ceil(progress / maxProgress);
