@@ -1,4 +1,4 @@
-# Detect the os: windows or linux, other os is not supported
+# Detect the os: windows or linux, other os is not really supported
 DETECTED_OS := 
 ifdef OS
 	DETECTED_OS = Windows
@@ -6,15 +6,18 @@ else
 	DETECTED_OS = $(shell uname)
 endif
 
-TARGET      := bin/main
-SRC_DIR     := src
-BUILD_DIR   := build
+# Target and directory
+MAIN_TARGET		:= bin/main
+RENDERER_TARGET	:= bin/renderer
+SRC_DIR     	:= src
+BUILD_DIR   	:= build
 
+# Files
 SRC_FILES   := 
 ifeq ($(DETECTED_OS), Windows)
-	SRC_FILES = $(foreach dir,src,$(wildcard $(dir)/*.cpp) $(wildcard $(dir)/*/*.cpp))
+	SRC_FILES = $(filter-out $(SRC_DIR)/renderer.cpp,$(foreach dir,$(SRC_DIR),$(wildcard $(dir)/*.cpp) $(wildcard $(dir)/*/*.cpp) $(wildcard $(dir)/*/*/*.cpp)))
 else
-	SRC_FILES = $(shell find $(SRC_DIR) -name "*.cpp")
+	SRC_FILES = $(filter-out $(SRC_DIR)/renderer.cpp,$(shell find $(SRC_DIR) -name "*.cpp"))
 endif
 OBJ_FILES   := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRC_FILES))
 
@@ -22,25 +25,24 @@ OBJ_FILES   := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRC_FILES))
 CC          := g++
 CFLAGS      := -Wall -Wextra -I$(SRC_DIR)
 DEBUG_FLAGS := -g
-SFML_FLAGS := -lsfml-graphics -lsfml-window -lsfml-system
+SFML_FLAGS  := -lsfml-graphics -lsfml-window -lsfml-system
 
-# Define phony targets
+# Define phony MAIN_TARGETs
 .PHONY: all debug renderer run clean clean-bin clean-all
 
 # Build the program
-all: $(TARGET)
+all: $(MAIN_TARGET)
 
 # link the final executable
-$(TARGET): $(OBJ_FILES)
+$(MAIN_TARGET): $(OBJ_FILES)
 ifeq ($(DETECTED_OS), Windows)
 	@if not exist "$(dir $@)" md "$(dir $@)"
-	$(CC) $(OBJ_FILES) -o $@.exe
 else
 	@mkdir -p $(dir $@)
-	$(CC) $(OBJ_FILES) -o $@
 endif
+	$(CC) $(OBJ_FILES) -o $@
 
-# compile each .c into .o under build/
+# compile each .cpp into .o under build/
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 ifeq ($(DETECTED_OS), Windows)
 	@if not exist "$(dir $@)" md "$(dir $@)"
@@ -55,16 +57,17 @@ debug: all
 
 # Run the program
 run: all
-	@./$(TARGET)
+	@./$(MAIN_TARGET)
 
 # Clean build files
 clean:
 	@echo "Cleaning build files..."
 ifeq ($(DETECTED_OS), Windows)
 	@if exist "$(BUILD_DIR)" @rmdir /Q /S "$(BUILD_DIR)"
-	@if exist "$(subst /,\,$(TARGET)).exe" @del "$(subst /,\,$(TARGET)).exe"
+	@if exist "$(subst /,\,$(MAIN_TARGET)).exe" @del "$(subst /,\,$(MAIN_TARGET)).exe"
+	@if exist "$(subst /,\,$(RENDERER_TARGET)).exe" @del "$(subst /,\,$(RENDERER_TARGET)).exe"
 else
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(MAIN_TARGET) $(RENDERER_TARGET)
 endif
 
 # Clean binary file
@@ -85,4 +88,4 @@ print:
 
 renderer:
 	@echo "Building renderer..."
-	$(CC) -o renderer src/renderer.cpp src/stima/geometry/Point3D.cpp $(SFML_FLAGS)
+	$(CC) -o $(RENDERER_TARGET) src/renderer.cpp src/stima/geometry/Point3D.cpp -I$(SRC_DIR) $(SFML_FLAGS)
