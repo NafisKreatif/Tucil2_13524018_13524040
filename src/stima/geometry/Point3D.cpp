@@ -139,7 +139,7 @@ namespace stima {
     }
     bool Point3D::isApproximately(const Point3D &p, double epsilon)
     {
-        return abs(x - p.x) < epsilon && abs(y - p.y) < epsilon && abs(z - p.z) < epsilon;
+        return std::abs(x - p.x) < epsilon && std::abs(y - p.y) < epsilon && std::abs(z - p.z) < epsilon;
     }
 
     std::string Point3D::toString()

@@ -8,10 +8,11 @@ namespace stima {
     public:
         Plane3D(Point3D p1, Point3D p2, Point3D p3);
         Point3D getNormal();
-        bool isParallel(Line3D line);
-        bool isParallel(Plane3D plane);
-        bool isIntersect(Line3D line);
-        Point3D getIntersection(Line3D line);
+        bool isOnThePlane(Point3D& p);
+        bool isParallel(Line3D& line);
+        bool isParallel(Plane3D& plane);
+        bool isIntersect(Line3D& line);
+        Point3D getIntersection(Line3D& line);
         std::string toString();
 
     private:
