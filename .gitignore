@@ -6,6 +6,8 @@
 *.lo
 *.o
 *.obj
+!test/
+!output/
 
 # Precompiled Headers
 *.gch
@@ -39,3 +41,5 @@
 
 # debug information files
 *.dwo
+
+bin/
