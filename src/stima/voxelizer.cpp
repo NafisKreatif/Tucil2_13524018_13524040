@@ -52,9 +52,13 @@ namespace stima {
                 vertices.push_back(Point3D(x, y, z));
             }
             else if (type == "f") {
-                if (!(lineStream >> v1 >> v2 >> v3)) {
+                std::string s1, s2, s3;
+                if (!(lineStream >> s1 >> s2 >> s3)) {
                     continue;
                 }
+                v1 = std::stoi(s1);
+                v2 = std::stoi(s2);
+                v3 = std::stoi(s3);
                 faces.push_back({v1, v2, v3});
             }
         }
@@ -87,7 +91,7 @@ namespace stima {
         voxalizeRecursive(0, maxDepth, pMin, pMax, vertices, faces, 0);
         auto end = std::chrono::steady_clock::now();
         std::cout << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-        std::cout << "Outputting to " << "tes/output/voxelized-" + filePath.filename().string() << std::endl;
+        std::cout << "Outputting to " << "test/output/voxelized-" + filePath.filename().string() << std::endl;
         std::ofstream outputFile("test/output/voxelized-" + filePath.filename().string());
         for (auto &&p : resultVertices) {
             outputFile << "v " << p.x << " " << p.y << " " << p.z << "\n";
@@ -234,10 +238,13 @@ namespace stima {
                         Point3D cp1 = (pt[1] - pt[0]).crossProduct(intersection - pt[0]);
                         Point3D cp2 = (pt[2] - pt[1]).crossProduct(intersection - pt[1]);
                         Point3D cp3 = (pt[0] - pt[2]).crossProduct(intersection - pt[2]);
-                        bool sameX = (cp1.x >= 0 && cp2.x >= 0 && cp3.x >= 0) || (cp1.x <= 0 && cp2.x <= 0 && cp3.x <= 0);
-                        bool sameY = (cp1.y >= 0 && cp2.y >= 0 && cp3.y >= 0) || (cp1.y <= 0 && cp2.y <= 0 && cp3.y <= 0);
-                        bool sameZ = (cp1.z >= 0 && cp2.z >= 0 && cp3.z >= 0) || (cp1.z <= 0 && cp2.z <= 0 && cp3.z <= 0);
-                        bool orientedTheSame = sameX && sameY && sameZ;
+                        if (cp1.magnitude() < 1e-9 || cp2.magnitude() < 1e-9 || cp3.magnitude() < 1e-9) {
+                            continue;
+                        }
+                        Point3D cp1norm = cp1.normalize();
+                        Point3D cp2norm = cp2.normalize();
+                        Point3D cp3norm = cp3.normalize();
+                        bool orientedTheSame = cp1norm.isApproximately(cp2norm) && cp2norm.isApproximately(cp3norm) && cp1norm.isApproximately(cp3norm);
                         bool atSquareSide = (intersection - ps[k]).dotProduct(squareSide.v) >= 0 && (intersection - ps[(k + 1) % 4]).dotProduct(-squareSide.v) >= 0;
                         if (orientedTheSame && atSquareSide) {
                             isIntersect = true;
