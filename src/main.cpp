@@ -16,6 +16,7 @@ int main()
         voxelizer.voxelize(path, maxDepth);
         cout << "STATISTICS" << endl;
         cout << "=========================" << endl;
+        cout << "Max Depth: " << maxDepth << endl;
         cout << "Voxel Count: " << voxelizer.getVoxelCount() << endl;
         cout << "Vertice Count: " << voxelizer.getResultVertices().size() << endl;
         cout << "Face (Triangle) Count: " << voxelizer.getResultFaces().size() << endl;
