@@ -74,10 +74,9 @@ namespace stima {
             pMax.y = std::max(pMax.y, p.y);
             pMax.z = std::max(pMax.z, p.z);
         }
-        pMin -= Point3D(1, 1, 1);
         Point3D v = pMax - pMin;
         double maxV = std::max(std::max(v.x, v.y), v.z);
-        pMax = pMin + Point3D(maxV, maxV, maxV) + Point3D(1, 1, 1);
+        pMax = pMin + Point3D(maxV, maxV, maxV);
         progress = 0;
         maxProgress = (std::pow(8, maxDepth + 1) - 1) / 7.0;
         lastPercentage = 0;
@@ -151,9 +150,10 @@ namespace stima {
         canOutput.unlock();
 
         Point3D v = pMax - pMin;
-        bool isIntersect = false;
         int intersectIndex = startFaceIndex;
-        for (int f = startFaceIndex; f < (int)faces.size(); f++) {
+        std::vector<std::tuple<int, int, int>> intersectingFaces;
+        for (int f = 0; f < (int)faces.size(); f++) {
+            bool isIntersect = false;
             // Point of triangle
             Point3D pt[3] = {
                 vertices[std::get<0>(faces[f]) - 1],
@@ -167,8 +167,8 @@ namespace stima {
                 }
             }
             if (isIntersect) {
-                intersectIndex = f;
-                break;
+                intersectingFaces.push_back(faces[f]);
+                continue;
             }
             Plane3D triangleFace = Plane3D(pt[0], pt[1], pt[2]);
             for (int j = 0; j < 6; j++) {
@@ -256,12 +256,12 @@ namespace stima {
             }
 
             if (isIntersect) {
-                intersectIndex = f;
-                break;
+                intersectingFaces.push_back(faces[f]);
+                continue;
             }
         }
 
-        if (isIntersect) {
+        if (!intersectingFaces.empty()) {
             if (depth >= maxDepth) {
                 canOutput.lock();
                 voxelCount++;
@@ -287,24 +287,24 @@ namespace stima {
                     q2[i] = q1[i] + v;
                 }
                 if (depth >= 3) {
-                    voxalizeRecursive(depth + 1, maxDepth, q1[0], q2[0], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[1], q2[1], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[2], q2[2], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[3], q2[3], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[4], q2[4], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[5], q2[5], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[6], q2[6], std::ref(vertices), std::ref(faces), intersectIndex);
-                    voxalizeRecursive(depth + 1, maxDepth, q1[7], q2[7], std::ref(vertices), std::ref(faces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[0], q2[0], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[1], q2[1], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[2], q2[2], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[3], q2[3], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[4], q2[4], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[5], q2[5], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[6], q2[6], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    voxalizeRecursive(depth + 1, maxDepth, q1[7], q2[7], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
                 }
                 else {
-                    std::thread t1(voxalizeRecursive, depth + 1, maxDepth, q1[0], q2[0], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t2(voxalizeRecursive, depth + 1, maxDepth, q1[1], q2[1], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t3(voxalizeRecursive, depth + 1, maxDepth, q1[2], q2[2], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t4(voxalizeRecursive, depth + 1, maxDepth, q1[3], q2[3], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t5(voxalizeRecursive, depth + 1, maxDepth, q1[4], q2[4], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t6(voxalizeRecursive, depth + 1, maxDepth, q1[5], q2[5], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t7(voxalizeRecursive, depth + 1, maxDepth, q1[6], q2[6], std::ref(vertices), std::ref(faces), intersectIndex);
-                    std::thread t8(voxalizeRecursive, depth + 1, maxDepth, q1[7], q2[7], std::ref(vertices), std::ref(faces), intersectIndex);
+                    std::thread t1(voxalizeRecursive, depth + 1, maxDepth, q1[0], q2[0], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t2(voxalizeRecursive, depth + 1, maxDepth, q1[1], q2[1], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t3(voxalizeRecursive, depth + 1, maxDepth, q1[2], q2[2], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t4(voxalizeRecursive, depth + 1, maxDepth, q1[3], q2[3], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t5(voxalizeRecursive, depth + 1, maxDepth, q1[4], q2[4], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t6(voxalizeRecursive, depth + 1, maxDepth, q1[5], q2[5], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t7(voxalizeRecursive, depth + 1, maxDepth, q1[6], q2[6], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
+                    std::thread t8(voxalizeRecursive, depth + 1, maxDepth, q1[7], q2[7], std::ref(vertices), std::ref(intersectingFaces), intersectIndex);
                     t1.join();
                     t2.join();
                     t3.join();
