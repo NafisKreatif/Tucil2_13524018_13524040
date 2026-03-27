@@ -18,7 +18,7 @@ int main()
         cout << "=========================" << endl;
         cout << "Max Depth: " << maxDepth << endl;
         cout << "Voxel Count: " << voxelizer.getVoxelCount() << endl;
-        cout << "Vertice Count: " << voxelizer.getResultVertices().size() << endl;
+        cout << "Vertex Count: " << voxelizer.getResultVertices().size() << endl;
         cout << "Face (Triangle) Count: " << voxelizer.getResultFaces().size() << endl;
         cout << "Traversed Node in Recursion Tree: " << endl;
         auto &traversedCount = voxelizer.getTraversedCount();
