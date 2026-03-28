@@ -61,6 +61,7 @@ make run
 ./bin/main
 ```
 
+#### Renderer
 ```bash
 # Build renderer
 make renderer
